@@ -1,4 +1,4 @@
-# Document Copilot — implementation checklist
+# EquityLens — implementation checklist
 
 Work top to bottom. Each phase unlocks the next. Check items off as you go.
 

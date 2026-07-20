@@ -18,7 +18,7 @@ function ChatHeader() {
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <SidebarTrigger className="text-muted-foreground" />
       <span className="truncate text-sm font-medium text-foreground">
-        {activeThread?.title ?? 'Document Copilot'}
+        {activeThread?.title ?? 'EquityLens'}
       </span>
     </header>
   )

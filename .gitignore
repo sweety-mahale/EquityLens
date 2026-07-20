@@ -42,5 +42,5 @@ Thumbs.db
 *.log
 logs/
 
-AGENTS.md/
-Revised.md
+AGENTS.md/*
+Revised.md/

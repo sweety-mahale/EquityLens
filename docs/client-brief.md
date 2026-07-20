@@ -1,50 +1,31 @@
-# Client brief — Driftwood Capital
+# Client brief — EquityLens
 
 ## The client
 
-**Driftwood Capital** is an independent investment research firm with ~40 analysts. They sell deep equity research to institutional clients (hedge funds, mutual funds, pension funds) under annual subscriptions ($50K–$500K+ per client), plus custom commissioned research and analyst calls.
+**EquityLens** is an independent investment research platform used by equity research analysts who sell deep research to institutional clients (hedge funds, mutual funds, portfolio managers).
 
-They don't manage money themselves. Their product is research and access to their analysts.
+## How analysts add value
 
-## How Driftwood makes money
-
-- Analysts each cover ~15 US public companies in a specific industry (semiconductors, retail, energy, etc.)
-- They produce written research reports, financial models, and stock-level recommendations
-- Asset-management clients pay for the reports and for the right to call the analyst with questions
-- Reputation is everything — a single bad call dents the franchise
-
-## How they add value
-
-- Their clients (portfolio managers at funds) don't have the bandwidth to read every 10-K, 10-Q, earnings transcript, and industry filing for the companies they invest in
-- Driftwood's analysts have already done that reading and turned it into actionable summaries
-- The value is *condensation*: turning thousands of pages into a one-page thesis the PM can act on
-
-## The problem
-
-Every Driftwood analyst spends roughly **half of every week** doing source-document intake — opening SEC filings, scanning for the sections they care about (risk factors, MD&A, business segments), copy-pasting passages, comparing year-over-year. Only after that intake work can they produce any original analysis.
-
-The intake work is:
-
-- Boring
-- Necessary (you can't analyze what you haven't read)
-- Repetitive across analysts (multiple analysts read the same Apple 10-K every January)
-- The biggest single drag on analyst output
-
-Hiring more analysts doesn't fix it — the intake bottleneck scales linearly with coverage. They want to fix the bottleneck.
+- Analysts each cover ~15 public companies in specific industries (IT services, banking, retail, auto, energy, etc.).
+- They produce written research reports, financial models, and trend analysis.
+- Their clients don't have the bandwidth to read every Annual Report, Quarterly Result, Investor Presentation, and Earnings Transcript.
+- EquityLens turns thousands of filing pages into structured insights that analysts can act on.
 
 ## What they want
 
-An internal chatbot — call it **Document Copilot** — where any Driftwood analyst can:
+An internal chatbot — **EquityLens** — where any analyst can:
 
-- Ask questions in plain English about any filing in Driftwood's curated corpus
-- Get a sourced answer that cites the specific filing and the specific page
-- Trust the answer enough to base downstream analysis on it
-- Use it from a browser, logged in with their Driftwood email address
-- See their own past conversations
+- Ask questions in plain English about any filing in the curated Indian corporate filing corpus.
+- Get a grounded answer that cites specific source filing passages.
+- Trust the answer enough to base downstream analysis on it.
+- Use it from a browser, logged in with their email address.
+- See their own past conversations.
 
 ## Example analyst questions
 
-The current sample corpus contains 10-K filings for Apple, Amazon, Alphabet, Microsoft, and NVIDIA across fiscal years 2021–2025. The bot should be able to handle questions like these with cited answers and underlying passages:
+The corpus contains Indian corporate filings (Annual Reports, Quarterly Results, Investor Presentations) for large-cap Indian companies across FY2022–FY2025. The bot handles questions like:
+
+1. Compare Infosys and TCS annual revenue growth and operating margin trends from FY2022 to FY2025.
 
 1. Across Apple's 2021–2025 10-Ks, how did the revenue mix between iPhone, Services, Mac, iPad, and Wearables change, and which category appears to have contributed most to any mix shift?
 2. For Amazon, compare AWS operating income and margin against North America and International from 2021–2025. In which years did AWS appear to fund losses or weaker profitability elsewhere?

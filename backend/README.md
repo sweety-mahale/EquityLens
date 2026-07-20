@@ -1,12 +1,12 @@
 # Backend
 
-FastAPI service for Document Copilot. Python 3.12+, managed with [uv](https://docs.astral.sh/uv/).
+FastAPI service for EquityLens. Python 3.12+, managed with [uv](https://docs.astral.sh/uv/).
 
 ## Setup
 
 ```bash
 cd backend
-cp .env.example .env   # fill in Supabase, Postgres, and OpenAI values
+cp .env.example .env   # fill in Supabase, Postgres, and Gemini values
 uv sync
 ```
 

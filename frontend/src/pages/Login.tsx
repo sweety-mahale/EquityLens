@@ -37,7 +37,7 @@ export function Login() {
   return (
     <AuthLayout
       title="Sign in"
-      description="Use your email and password to access Document Copilot."
+      description="Use your email and password to access EquityLens."
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">

@@ -2,8 +2,8 @@
 
 This repo deploys to Railway as two services from one project:
 
-- `document-copilot-backend` from `backend/` — FastAPI + Uvicorn.
-- `document-copilot-frontend` from `frontend/` — Vite React build served by Caddy.
+- `equitylens-backend` from `backend/` — FastAPI + Uvicorn.
+- `equitylens-frontend` from `frontend/` — Vite React build served by Caddy.
 
 Supabase stays hosted at Supabase. Do not add Railway Postgres for this app.
 
@@ -13,7 +13,7 @@ Have these ready:
 
 - A GitHub repo with this project pushed, or the local repo plus the Railway CLI.
 - A Supabase project from [Supabase setup](supabase-setup.md).
-- An OpenAI API key.
+- A Google AI Studio API key for Gemini.
 - Production source documents loaded in Supabase, or be ready to run ingestion after deploy.
 
 Use the direct Supabase Postgres URL for `DATABASE_URL`, not the transaction pooler URL.
@@ -23,7 +23,7 @@ Use the direct Supabase Postgres URL for `DATABASE_URL`, not the transaction poo
 Use this path if you want to click through Railway yourself.
 
 1. In Railway, click **New Project** → **Deploy from GitHub repo** and select this repo.
-2. Name the backend service `document-copilot-backend`.
+2. Name the backend service `equitylens-backend`.
 3. Open backend **Settings**:
    - **Root Directory:** `/backend`
    - **Healthcheck Path:** `/health`
@@ -35,7 +35,10 @@ SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_ANON_KEY=your-anon-public-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-secret-key
 DATABASE_URL=postgresql://postgres:your-password@db.your-project-ref.supabase.co:5432/postgres
-OPENAI_API_KEY=sk-your-openai-api-key
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_CHAT_MODEL=gemini-2.5-flash
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+GEMINI_GROUNDING_MODEL=gemini-2.5-flash
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 

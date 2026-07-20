@@ -56,7 +56,7 @@ export function SignUp() {
   return (
     <AuthLayout
       title="Create account"
-      description="Sign up with your work email to use Document Copilot."
+      description="Sign up with your email to use EquityLens."
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
@@ -68,7 +68,7 @@ export function SignUp() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@driftwood.com"
+            placeholder="analyst@equitylens.com"
           />
         </div>
 

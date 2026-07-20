@@ -12,7 +12,7 @@ Reuse as much of the existing project as possible.
 
 # Existing Project
 
-The current project is Document Copilot.
+The current project is EquityLens.
 
 It is an enterprise RAG application for SEC EDGAR filings.
 

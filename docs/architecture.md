@@ -1,14 +1,14 @@
-# Document Copilot Architecture
+# EquityLens Architecture
 
 ## Purpose
 
-Document Copilot is an internal research assistant for analysts who need grounded answers from a curated SEC filing corpus. The architecture must optimize for trust: every answer is generated from retrieved source passages, every factual claim is citable, and the system fails clearly when the corpus does not support an answer.
+EquityLens is an internal research assistant for equity analysts who need grounded answers from a curated Indian corporate filing corpus. The architecture optimizes for trust: every answer is generated from retrieved source passages, every factual claim is citable, and the system fails clearly when the corpus does not support an answer.
 
-This document describes the target architecture for the chat experience, LLM orchestration, and the communication layer between the React SPA, Supabase, and FastAPI backend.
+This document describes the architecture for the chat experience, LLM orchestration, and the communication layer between the React SPA, Supabase, and FastAPI backend.
 
 ## High-Level Architecture
 
-The best opening diagram is a service-level view that shows the two core paths: the live chat path that serves users, and the ingestion path that prepares SEC filings for retrieval.
+The service-level view shows the two core paths: the live chat path that serves users, and the ingestion pipeline that prepares corporate filings for retrieval.
 
 ```mermaid
 flowchart LR
@@ -24,8 +24,8 @@ flowchart LR
         db[(Postgres<br/>chats, documents, chunks<br/>pgvector + full-text)]
     end
 
-    openai[OpenAI<br/>LLM + embeddings]
-    corpus[SEC filing corpus]
+    gemini[Google Gemini<br/>LLM + embeddings]
+    corpus[Indian corporate filing corpus]
     ingestion[Ingestion pipeline<br/>download, parse, chunk, embed]
 
     frontend -->|serves app| browser
@@ -34,7 +34,7 @@ flowchart LR
     browser -->|chat request + JWT| backend
     backend -->|verify user| auth
     backend -->|retrieve passages<br/>persist chats + citations| db
-    backend -->|generate grounded answer| openai
+    backend -->|generate grounded answer| gemini
     backend -->|stream answer + citations| browser
 
     corpus --> ingestion
