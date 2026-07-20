@@ -1,70 +1,160 @@
-# Client brief — EquityLens
+# Client Brief — InsightBridge Research
 
-## The client
+## The Client
 
-**EquityLens** is an independent investment research platform used by equity research analysts who sell deep research to institutional clients (hedge funds, mutual funds, portfolio managers).
+**InsightBridge Research** is an independent equity research firm based in Mumbai with approximately **35 research analysts** covering Indian listed companies. The firm provides institutional-grade research to mutual funds, portfolio management services (PMS), alternative investment funds (AIFs), family offices, and wealth management firms across India.
 
-## How analysts add value
+InsightBridge does not manage investments or execute trades. Their business is producing high-quality equity research, financial analysis, sector reports, and providing direct analyst access to institutional clients.
 
-- Analysts each cover ~15 public companies in specific industries (IT services, banking, retail, auto, energy, etc.).
-- They produce written research reports, financial models, and trend analysis.
-- Their clients don't have the bandwidth to read every Annual Report, Quarterly Result, Investor Presentation, and Earnings Transcript.
-- EquityLens turns thousands of filing pages into structured insights that analysts can act on.
+## How InsightBridge Makes Money
 
-## What they want
+- Analysts specialize in sectors such as Banking, IT, Pharmaceuticals, FMCG, Infrastructure, Energy, and Manufacturing.
+- Each analyst covers approximately 12–18 Indian listed companies.
+- They publish company research reports, earnings summaries, valuation models, and sector outlook reports.
+- Institutional clients pay annual subscriptions for research access and analyst consultations.
+- The firm's reputation depends entirely on delivering accurate, evidence-backed research.
 
-An internal chatbot — **EquityLens** — where any analyst can:
+## How They Add Value
 
-- Ask questions in plain English about any filing in the curated Indian corporate filing corpus.
-- Get a grounded answer that cites specific source filing passages.
-- Trust the answer enough to base downstream analysis on it.
-- Use it from a browser, logged in with their email address.
-- See their own past conversations.
+Institutional investors don't have time to manually review hundreds of pages of financial disclosures released every quarter.
 
-## Example analyst questions
+Instead, InsightBridge analysts carefully review:
 
-The corpus contains Indian corporate filings (Annual Reports, Quarterly Results, Investor Presentations) for large-cap Indian companies across FY2022–FY2025. The bot handles questions like:
+- Annual Reports
+- Quarterly Results
+- Investor Presentations
+- Earnings Call Transcripts
+- Corporate Announcements
+- Regulatory Disclosures from NSE/BSE
+- IPO Prospectuses (DRHP/RHP)
 
-1. Compare Infosys and TCS annual revenue growth and operating margin trends from FY2022 to FY2025.
+They transform thousands of pages of disclosures into concise investment insights and research reports that help portfolio managers make informed decisions.
 
-1. Across Apple's 2021–2025 10-Ks, how did the revenue mix between iPhone, Services, Mac, iPad, and Wearables change, and which category appears to have contributed most to any mix shift?
-2. For Amazon, compare AWS operating income and margin against North America and International from 2021–2025. In which years did AWS appear to fund losses or weaker profitability elsewhere?
-3. How did NVIDIA describe demand drivers, customer concentration, and supply constraints for its Data Center business from fiscal 2021 through fiscal 2025?
-4. Across Microsoft's 2021–2025 filings, what changed in the way the company describes Azure, AI infrastructure, and cloud capacity constraints?
-5. For Alphabet, how did Google Search, YouTube ads, Google Network, subscriptions/platforms/devices, and Google Cloud revenue trends differ across the available 10-Ks?
-6. Which of the five companies added, removed, or materially changed risk-factor language related to AI, cloud infrastructure, export controls, supply chain concentration, or regulation between 2021 and 2025?
-7. For Apple and NVIDIA, what do the filings say about supplier concentration or dependence on third-party manufacturing, and did the wording become more or less urgent over time?
-8. Compare capital expenditures and purchase commitments for Microsoft, Alphabet, Amazon, and NVIDIA. What do the filings imply about the scale and timing of AI/cloud infrastructure investment?
-9. For each company, summarize the most important geographic revenue exposures disclosed in the latest 10-K, then identify any year-over-year changes that could matter to an analyst.
-10. If an analyst asks whether the filings prove that generative AI improved margins for any of these companies, what evidence exists in the corpus, and where should the bot refuse to infer beyond the filings?
+The firm's competitive advantage is not having more information than everyone else—it is finding relevant information faster and presenting it clearly.
 
-## What "trust" means here
+## The Problem
 
-This is a research firm. Their entire business is being right. The bot must:
+Every analyst spends nearly **half of every working week** reading and organizing company disclosures before they can begin any meaningful research.
 
-- **Never invent facts.** If the answer isn't in the corpus, it says so.
-- **Always cite.** Every claim links to the source filing + page.
-- **Show the underlying passage** so the analyst can verify in one click.
+A typical workflow looks like this:
 
-A wrong but confident answer is worse than no answer. Hallucinations kill the product.
+1. Download annual reports from company websites or stock exchanges.
+2. Read Management Discussion & Analysis (MD&A).
+3. Review Risk Factors.
+4. Compare segment revenue across previous years.
+5. Search earnings call transcripts for management commentary.
+6. Copy important paragraphs into research notes.
+7. Compare wording changes between multiple financial years.
+
+Only after completing this repetitive document intake can analysts begin writing their research.
+
+This document intake work is:
+
+- Time-consuming
+- Highly repetitive
+- Essential for producing quality research
+- Repeated across multiple analysts covering related sectors
+
+For example, multiple analysts may independently review the same Reliance Industries Annual Report while preparing sector-specific research.
+
+Hiring additional analysts does not solve the problem because document review scales linearly with company coverage.
+
+InsightBridge wants to eliminate this bottleneck.
+
+## What They Want
+
+InsightBridge wants an internal AI-powered assistant called **EquityLens** (Research Copilot).
+
+The application should allow analysts to:
+
+- Ask questions in plain English across the firm's document library.
+- Search across multiple companies and multiple financial years simultaneously.
+- Receive answers supported by precise document citations.
+- View the original paragraph and page number supporting every answer.
+- Continue previous research conversations.
+- Access the system securely through a web application using their company email.
+
+The system should become the firm's first stop before manually opening hundreds of PDF documents.
+
+## Example Analyst Questions
+
+The initial document corpus contains Annual Reports, Investor Presentations, and Earnings Call Transcripts for major Indian listed companies between FY2021 and FY2025.
+
+The assistant should answer questions such as:
+
+1. Across Reliance Industries' FY2021–FY2025 Annual Reports, how has the contribution of Digital Services, Retail, and Oil-to-Chemicals changed?
+2. Compare Infosys' discussion of Artificial Intelligence and Generative AI across FY2022–FY2025. How has management's messaging evolved?
+3. How has TCS described employee attrition, hiring trends, and productivity improvements over the last five financial years?
+4. Compare HDFC Bank and ICICI Bank's disclosures regarding retail lending, credit quality, and Gross NPA trends from FY2021–FY2025.
+5. Across Tata Motors' Annual Reports, how has management discussed electric vehicles, Jaguar Land Rover, and capital investment priorities?
+6. Which companies introduced significant new risk disclosures related to Artificial Intelligence, cybersecurity, geopolitical risks, supply chain disruptions, or data privacy?
+7. Compare capital expenditure trends for Reliance Industries, Tata Steel, Larsen & Toubro, and Adani Enterprises. What do the filings indicate about future investment priorities?
+8. Summarize the latest geographic revenue exposure for Infosys, Wipro, TCS, and HCLTech, highlighting major year-over-year changes.
+9. Compare commentary on cloud services and digital transformation across Infosys, TCS, and Wipro between FY2022 and FY2025.
+10. If an analyst asks whether company disclosures prove that AI investments directly improved profitability, what evidence exists in the available documents, and where should the assistant refuse to make unsupported conclusions?
+
+## What "Trust" Means
+
+InsightBridge's business depends on research accuracy.
+
+The assistant must:
+
+- **Never generate information** that is not present in the document corpus.
+- **Clearly state** when sufficient evidence does not exist.
+- **Provide citations** for every factual statement.
+- **Display the exact supporting paragraph and page number** for verification.
+- **Distinguish facts** from assumptions or interpretations.
+
+A missing answer is acceptable. A hallucinated answer is unacceptable.
+
+## Document Corpus
+
+The document library consists of publicly available corporate disclosures from major Indian listed companies.
+
+Documents include:
+
+- Annual Reports
+- Quarterly Financial Results
+- Investor Presentations
+- Earnings Call Transcripts
+- Corporate Announcements
+- Shareholding Pattern filings
+- IPO Prospectuses (DRHP/RHP)
+
+The initial pilot focuses on approximately 50 Nifty 100 companies covering FY2021–FY2025.
 
 ## Constraints
 
-- Corpus: SEC filings (10-Ks and 10-Qs) for S&P 500 companies, 2020–2025
-- Source: SEC EDGAR (public domain)
-- Users: ~40 Driftwood analysts, plus a few partners
-- Login: Driftwood email addresses (no SSO required)
-- Hosting: must run on a small/medium cloud footprint; Driftwood has no infra team
+- **Document source:** Public corporate disclosures available through company Investor Relations portals and Indian stock exchange filings (NSE/BSE).
+- **Users:** Approximately 35 research analysts and research partners.
+- **Authentication:** Company email and password (no SSO required).
+- **Hosting:** Must run efficiently on a small-to-medium cloud deployment.
+- **Ingestion:** Incremental ingestion as new company filings become available.
 
-## Out of scope (explicitly)
+## Out of Scope
 
-- Trading recommendations or stock picks
-- External data sources (no news, no social, no alternative data)
-- Anything generating analysis not grounded in the corpus
-- Multi-tenant / multi-client. This is Driftwood-internal only.
-- Billing, plans, paywalls
-- Mobile app
+The first release will not include:
 
-## Definition of done
+- Stock recommendations
+- Buy/Sell/Hold suggestions
+- Portfolio management
+- Live market prices
+- Financial forecasting
+- News summarization
+- Social media analysis
+- External web search
+- Multi-tenant SaaS functionality
+- Mobile application
 
-The analyst pilot group (5 senior analysts) tries it for a week and reports it saves them at least 3 hours per analyst per week. If yes, Driftwood rolls it out firm-wide.
+The assistant should answer questions only from the approved document corpus.
+
+## Definition of Done
+
+A pilot group of five senior research analysts uses the application for one week while preparing company research.
+
+The pilot is considered successful if:
+
+1. Analysts report saving at least three hours per week on document review.
+2. Every answer includes verifiable citations.
+3. Analysts trust the system enough to use it as their primary document search tool before manually reviewing filings.
+4. No critical hallucinations are observed during the pilot.
