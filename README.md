@@ -4,8 +4,6 @@
 
 An internal AI platform that lets analysts query corporate financial documents in plain English and receive accurate, source-cited answers.
 
----
-
 ## The Client
 
 **InsightBridge Research** *(fictional)* is an independent Indian equity research firm with approximately **35 research analysts** covering publicly listed companies across sectors including Banking, IT, FMCG, Energy, Infrastructure, Manufacturing, and Pharmaceuticals.
@@ -14,11 +12,11 @@ Analysts spend nearly **half of every working week** reading corporate filings b
 
 EquityLens eliminates this bottleneck by transforming thousands of pages of corporate disclosures into a searchable knowledge base powered by Retrieval-Augmented Generation (RAG).
 
-> 📄 Full project brief: `docs/client-brief.md`
+> 📄 Full project brief: [`docs/client-brief.md`](docs/client-brief.md)
 
 ---
 
-# Solution
+## Solution
 
 EquityLens provides a centralized AI-powered platform where analysts can:
 
@@ -33,7 +31,7 @@ The platform is designed to improve research productivity without generating uns
 
 ---
 
-# Built with RAG Architecture
+## RAG Architecture
 
 EquityLens uses a **Retrieval-Augmented Generation (RAG)** architecture.
 
@@ -50,7 +48,7 @@ This approach helps:
 
 ---
 
-# System Architecture
+## System Architecture
 
 ```text
                                +----------------------+
@@ -108,24 +106,24 @@ This approach helps:
 
 ---
 
-# Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |--------|------------|
 | Frontend | React + TypeScript (Vite) |
 | Backend | FastAPI |
 | Authentication | Supabase Auth |
-| Database | PostgreSQL |
-| Vector Database | pgvector |
-| Retrieval | Hybrid Search (Vector + Full-Text Search) |
-| Embedding Model | OpenAI Embeddings |
-| LLM | OpenAI GPT |
+| Database | PostgreSQL (Supabase) |
+| Vector Database | `pgvector` |
+| Retrieval | Hybrid Search (Vector + Full-Text Search with RRF) |
+| Embedding Model | Google Gemini (`gemini-embedding-001`) |
+| LLM | Google Gemini (`gemini-2.5-flash`) |
 | Storage | Supabase Storage |
 | Deployment | Railway |
 
 ---
 
-# Core Features
+## Core Features
 
 - Enterprise RAG architecture
 - Hybrid Retrieval (Semantic + Keyword Search)
@@ -141,7 +139,7 @@ This approach helps:
 
 ---
 
-# Supported Documents
+## Supported Documents
 
 The platform currently supports indexing:
 
@@ -160,21 +158,22 @@ Future document sources:
 
 ---
 
-# Sample Dataset
+## Sample Dataset
 
 The initial corpus contains publicly available financial disclosures for leading Indian companies, including:
 
-- Reliance Industries
-- TCS
-- Infosys
-- HDFC Bank
-- ICICI Bank
-- Wipro
-- Hindustan Unilever
-- Bajaj Finance
+- Reliance Industries (`RELIANCE`)
+- Tata Consultancy Services (`TCS`)
+- Infosys (`INFY`)
+- HDFC Bank (`HDFCBANK`)
+- ICICI Bank (`ICICIBANK`)
+- Wipro (`WIPRO`)
+- Hindustan Unilever (`HINDUNILVR`)
+- Bajaj Finance (`BAJFINANCE`)
 
 Document coverage spans **FY2022–FY2025**, enabling cross-company and year-over-year analysis.
-```
+
+---
 
 ## Prerequisites
 
@@ -183,8 +182,102 @@ Install these before setting up `backend/` or `frontend/`:
 | Tool | Version | Used for | Install |
 | ---- | ------- | -------- | ------- |
 | [Python](https://www.python.org/downloads/) | 3.12+ | Backend runtime | OS package manager or python.org |
-| [uv](https://docs.astral.sh/uv/getting-started/installation/) | latest | Backend deps + `data/download.py` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | latest | Backend deps + ingestion scripts | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | [Node.js](https://nodejs.org/) | 20+ (LTS) | Frontend toolchain | nodejs.org or `nvm install --lts` |
 | [pnpm](https://pnpm.io/installation) | latest | Frontend package manager | `corepack enable && corepack prepare pnpm@latest --activate` |
 
+You will also need a [Supabase project](https://supabase.com) and a [Google AI Studio API Key](https://aistudio.google.com/) for Gemini models.
 
+---
+
+## Running Locally
+
+1. **Setup Environment Variables:**
+
+   **Backend (`backend/.env`):**
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+   Configure `backend/.env`:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `DATABASE_URL` (direct Supabase Postgres connection string on port 6543)
+   - `GEMINI_API_KEY`
+   - `GEMINI_CHAT_MODEL=gemini-2.5-flash`
+   - `GEMINI_EMBEDDING_MODEL=gemini-embedding-001`
+   - `GEMINI_GROUNDING_MODEL=gemini-2.5-flash`
+   - `ALLOWED_ORIGINS=http://localhost:5173`
+
+   **Frontend (`frontend/.env`):**
+   ```bash
+   cd frontend
+   cp .env.example .env
+   ```
+   Configure `frontend/.env`:
+   - `VITE_API_BASE_URL=http://localhost:8000`
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+
+2. **Install Dependencies & Run Migrations:**
+   ```bash
+   cd backend
+   uv sync
+   uv run alembic upgrade head
+
+   cd ../frontend
+   pnpm install
+   ```
+
+3. **Start Local Servers:**
+
+   **Backend:**
+   ```bash
+   cd backend
+   uv run uvicorn app.main:app --reload
+   ```
+
+   **Frontend:**
+   ```bash
+   cd frontend
+   pnpm dev
+   ```
+   Open the application in your browser (typically `http://localhost:5173`).
+
+---
+
+## Ingesting Corporate Filings
+
+1. **Download Corporate Filings:**
+   ```bash
+   uv run data/download.py
+   ```
+   Downloads Annual Reports and Quarterly Results for large-cap Indian companies into `data/downloads/`.
+
+2. **Load Document Metadata into Database:**
+   ```bash
+   cd backend
+   uv sync --extra ingest
+   uv run python -m ingest.load_source_documents
+   ```
+
+3. **Chunk & Embed Documents:**
+   ```bash
+   cd backend
+   uv run python -m ingest.chunk_and_embed --all
+   ```
+
+---
+
+## Verification & Testing
+
+```bash
+cd backend
+uv run pytest
+uv run ruff check .
+
+cd ../frontend
+pnpm lint
+pnpm build
+```
