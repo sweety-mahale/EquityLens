@@ -18,9 +18,17 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+# Add backend to path so ingest.sources is importable
+backend_dir = Path(__file__).resolve().parent.parent / "backend"
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
+# pyrefly: ignore [missing-import]
+from ingest.sources.nse import NseDocumentSource  
+
 # ---------------------------------------------------------------------------
 # CONFIG — edit these before running
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 COMPANIES: list[dict] = [
     {"ticker": "RELIANCE",   "company_name": "Reliance Industries Ltd.",   "industry": "Energy"},
@@ -31,6 +39,8 @@ COMPANIES: list[dict] = [
     {"ticker": "WIPRO",      "company_name": "Wipro Ltd.",                  "industry": "Information Technology"},
     {"ticker": "HINDUNILVR", "company_name": "Hindustan Unilever Ltd.",     "industry": "FMCG"},
     {"ticker": "BAJFINANCE", "company_name": "Bajaj Finance Ltd.",          "industry": "NBFC"},
+    {"ticker": "SBIN",       "company_name": "State Bank of India",         "industry": "Banking"},
+    {"ticker": "LT",         "company_name": "Larsen & Toubro Ltd.",        "industry": "Infrastructure"},
 ]
 
 DOCUMENT_TYPES: list[str] = ["annual_report", "quarterly_results"]
@@ -43,12 +53,6 @@ OUTPUT_DIR = Path(__file__).resolve().parent / "nse_downloads"
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    # Add backend to path so ingest.sources is importable
-    backend_dir = Path(__file__).resolve().parent.parent / "backend"
-    sys.path.insert(0, str(backend_dir))
-
-    from ingest.sources.nse import NseDocumentSource  # noqa: PLC0415
-
     company_meta = {
         entry["ticker"]: (entry["company_name"], entry.get("industry"))
         for entry in COMPANIES

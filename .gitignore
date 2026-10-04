@@ -28,8 +28,12 @@ pnpm-debug.log*
 # Data / artifacts (downloaded corpus files are large, never check in)
 /data/downloads/*
 !/data/downloads/.gitkeep
+/data/nse_downloads/*
+!/data/nse_downloads/.gitkeep
 /data/markdown/*
 !/data/markdown/.gitkeep
+/data/download.py
+/data/convert_to_markdown.py
 *.parquet
 
 # IDE / OS
@@ -46,3 +50,4 @@ logs/
 AGENTS.md
 **/AGENTS.md
 Revised.md
+**/todos.md

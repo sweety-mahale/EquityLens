@@ -120,6 +120,7 @@ _TICKER_COMPANY_PREFIXES: dict[str, str] = {
     "SUNPHARMA": "sun",
     "ONGC": "ongc",
     "NTPC": "ntpc",
+    "LT": "larsen",
     # Legacy SEC tickers (preserved for backward compat)
     "AAPL": "apple",
     "AMZN": "amazon",

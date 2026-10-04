@@ -15,7 +15,7 @@ Usage:
 
 NSE API endpoints used:
   Annual Reports:        https://www.nseindia.com/api/annual-reports
-  Quarterly Results:     https://www.nseindia.com/api/corporates-financial-results
+  Quarterly Results:     https://www.nseindia.com/api/corporate-announcements
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ _NSE_COMMON_HEADERS = {
 
 _NSE_BASE = "https://www.nseindia.com"
 _ANNUAL_REPORT_API = f"{_NSE_BASE}/api/annual-reports"
-_QUARTERLY_API = f"{_NSE_BASE}/api/corporates-financial-results"
+_ANNOUNCEMENTS_API = f"{_NSE_BASE}/api/corporate-announcements"
 
 # Polite rate limit between requests (seconds)
 _REQUEST_DELAY = 1.5
@@ -136,23 +136,24 @@ class NseDocumentSource:
     def _fetch_annual_reports(
         self, client: httpx.Client, ticker: str
     ) -> list[DocumentRecord]:
+        api_headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Referer": _NSE_BASE,
+        }
         try:
-            api_headers = {
-                "Accept": "application/json, text/plain, */*",
-                "Referer": _NSE_BASE,
-            }
-            resp = client.get(
+            data = _get_json_with_session_retry(
+                client,
                 _ANNUAL_REPORT_API,
                 params={"symbol": ticker, "index": "cm"},
                 headers=api_headers,
             )
-            resp.raise_for_status()
-            data = resp.json()
         except Exception as exc:
             print(f"  [WARN] Annual reports API failed for {ticker}: {exc}")
             return []
 
         time.sleep(_REQUEST_DELAY)
+        if not data:
+            return []
         records: list[DocumentRecord] = []
 
         items = data.get("data", []) if isinstance(data, dict) else data
@@ -199,56 +200,66 @@ class NseDocumentSource:
     def _fetch_quarterly_results(
         self, client: httpx.Client, ticker: str
     ) -> list[DocumentRecord]:
+        """Fetch quarterly financial results filings from corporate announcements."""
+        api_headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Referer": _NSE_BASE,
+        }
+        records: list[DocumentRecord] = []
+        seen_quarters: set[str] = set()
+
         try:
-            api_headers = {
-                "Accept": "application/json, text/plain, */*",
-                "Referer": _NSE_BASE,
-            }
-            resp = client.get(
-                _QUARTERLY_API,
-                params={"symbol": ticker, "corpType": "financial", "index": "equities"},
+            announcements = _get_json_with_session_retry(
+                client,
+                _ANNOUNCEMENTS_API,
+                params={"index": "equities", "symbol": ticker},
                 headers=api_headers,
             )
-            resp.raise_for_status()
-            data = resp.json()
         except Exception as exc:
-            print(f"  [WARN] Quarterly results API failed for {ticker}: {exc}")
+            print(f"  [WARN] Corporate announcements API failed for {ticker}: {exc}")
             return []
 
         time.sleep(_REQUEST_DELAY)
-        records: list[DocumentRecord] = []
 
-        items = data.get("data", []) if isinstance(data, dict) else data
-        if not isinstance(items, list):
-            items = []
+        if not isinstance(announcements, list) or not announcements:
+            return []
 
-        for item in items:
-            pdf_candidates = [
-                item.get("pdfLink"),
-                item.get("attachment"),
-                item.get("resultDetailedDataLink"),
-                item.get("xbrl"),
-            ]
-            pdf_url = next((url for url in pdf_candidates if url), "")
-            if not pdf_url:
+        for item in announcements:
+            desc = ((item.get("desc") or "") + " " + (item.get("attchmntText") or "")).lower()
+
+            # Exclude non-results noise like trading window closures, concall transcripts, analyst meets
+            if "trading window" in desc or "investor meet" in desc or "con. call" in desc:
                 continue
 
-            filing_date_str = (
-                item.get("dateOfSubmission")
-                or item.get("date")
-                or item.get("filingDate")
-                or item.get("broadCastDate")
+            # Must be an outcome of board meeting or financial results
+            is_financial_result = (
+                "outcome of board meeting" in desc
+                or "financial result" in desc
+                or "financial results" in desc
+                or "un-audited financial" in desc
+                or "audited financial" in desc
             )
-            filing_date = _parse_nse_date(filing_date_str)
+            if not is_financial_result:
+                continue
+
+            pdf_url = item.get("attchmntFile") or ""
+            if not pdf_url or not pdf_url.lower().endswith(".pdf"):
+                continue
+
+            an_dt_str = item.get("an_dt") or item.get("date")
+            filing_date = _parse_nse_date(an_dt_str.split()[0] if an_dt_str else "")
             if filing_date is None:
                 continue
 
             fy = _quarter_from_date(filing_date)
-
             if self.years:
-                base_fy = f"FY{fy[-4:]}"  # "FY2025" from "Q3FY2025"
+                base_fy = f"FY{fy[-4:]}"
                 if base_fy not in self.years:
                     continue
+
+            # Avoid duplicate filings for the same quarter
+            if fy in seen_quarters:
+                continue
 
             record = self._download_and_build(
                 client,
@@ -260,6 +271,7 @@ class NseDocumentSource:
             )
             if record:
                 records.append(record)
+                seen_quarters.add(fy)
 
         return records
 
@@ -282,25 +294,21 @@ class NseDocumentSource:
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         if dest.is_file():
-            # If the file is already there, we might still need to extract it if it's a zip
-            if zipfile.is_zipfile(dest):
-                dest = _unzip_and_find_pdf(dest)
+            if _validate_filing_file(dest):
+                print(f"  [SKIP] Already downloaded & verified: {dest.name}")
             else:
-                print(f"  [SKIP] Already downloaded: {dest.name}")
-        else:
-            try:
-                print(f"  [DOWN] {dest.name} ← {full_url}")
-                pdf_resp = client.get(full_url)
-                pdf_resp.raise_for_status()
-                dest.write_bytes(pdf_resp.content)
+                print(f"  [RE-DOWN] Existing file corrupted/invalid, re-downloading: {dest.name}")
+                dest.unlink(missing_ok=True)
+                success = _download_stream_to_file(client, full_url, dest)
+                if not success:
+                    return None
                 time.sleep(_REQUEST_DELAY)
-                
-                # Check if downloaded file is actually a zip (despite .pdf extension)
-                if zipfile.is_zipfile(dest):
-                    dest = _unzip_and_find_pdf(dest)
-            except Exception as exc:
-                print(f"  [WARN] Download failed for {full_url}: {exc}")
+        else:
+            print(f"  [DOWN] {dest.name} ← {full_url}")
+            success = _download_stream_to_file(client, full_url, dest)
+            if not success:
                 return None
+            time.sleep(_REQUEST_DELAY)
 
         company_name, industry = self.company_meta.get(ticker, (ticker, None))
         return DocumentRecord(
@@ -313,6 +321,103 @@ class NseDocumentSource:
             storage_path=dest.resolve(),
             industry=industry,
         )
+
+
+def _validate_filing_file(path: Path) -> bool:
+    """Validate that a downloaded file is a non-empty, genuine PDF/HTML and not an exchange error page."""
+    if not path.is_file():
+        return False
+    try:
+        size = path.stat().st_size
+        # Valid corporate filings are practically never smaller than 2KB
+        if size < 2048:
+            return False
+        with open(path, "rb") as f:
+            header = f.read(1024)
+        # Check for HTML error pages masked with a .pdf extension
+        lower_header = header.lower()
+        if b"<html" in lower_header or b"<!doctype html" in lower_header:
+            return False
+        # Standard PDF magic bytes
+        if header.startswith(b"%PDF"):
+            return True
+        # Or a valid zip archive
+        if zipfile.is_zipfile(path):
+            return True
+        # Valid HTML/text filings
+        if path.suffix.lower() in {".html", ".htm", ".txt"} and size > 500:
+            return True
+    except Exception:
+        return False
+    return False
+
+
+def _download_stream_to_file(
+    client: httpx.Client,
+    url: str,
+    dest: Path,
+) -> bool:
+    """Stream download in 64KB chunks to a temporary file, validate, and move on completion."""
+    temp_file = dest.parent / f".tmp_{dest.name}"
+    try:
+        with client.stream("GET", url, timeout=60, follow_redirects=True) as resp:
+            if resp.status_code in (401, 403):
+                print(f"  [NSE] Download received {resp.status_code}. Re-warming session...")
+                _warm_session(client)
+                return False
+            resp.raise_for_status()
+            with open(temp_file, "wb") as f:
+                for chunk in resp.iter_bytes(chunk_size=65536):
+                    f.write(chunk)
+
+        # Check if the downloaded file is a zip archive
+        final_file = temp_file
+        if zipfile.is_zipfile(temp_file):
+            final_file = _unzip_and_find_pdf(temp_file)
+
+        # Validate file integrity
+        if not _validate_filing_file(final_file):
+            print(f"  [WARN] Downloaded file failed validation (corrupt or HTML error): {url}")
+            final_file.unlink(missing_ok=True)
+            return False
+
+        # Atomic move to final destination
+        if final_file != dest:
+            dest.unlink(missing_ok=True)
+            shutil.move(str(final_file), str(dest))
+        return True
+    except Exception as exc:
+        print(f"  [WARN] Download failed for {url}: {exc}")
+        temp_file.unlink(missing_ok=True)
+        return False
+
+
+def _get_json_with_session_retry(
+    client: httpx.Client,
+    url: str,
+    *,
+    params: dict[str, str] | None = None,
+    headers: dict[str, str] | None = None,
+    max_retries: int = 2,
+) -> dict | list | None:
+    """Execute GET request with automatic session re-warming if cookies expire."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = client.get(url, params=params, headers=headers, timeout=25)
+            if resp.status_code in (401, 403) or (resp.status_code == 200 and not resp.content):
+                print(f"  [NSE] Session expired (status {resp.status_code}). Re-warming (attempt {attempt}/{max_retries})...")
+                _warm_session(client)
+                time.sleep(2)
+                continue
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            if attempt == max_retries:
+                raise
+            print(f"  [NSE] Request failed ({exc}). Re-warming session and retrying...")
+            _warm_session(client)
+            time.sleep(2)
+    return None
 
 
 def _unzip_and_find_pdf(zip_path: Path) -> Path:
